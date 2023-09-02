@@ -17,6 +17,7 @@ class EventGANBase(object):
                               with_activation=True,
                               sn=options.sn,
                               multi=False)
+        print(options.checkpoint_dir)
         latest_checkpoint = get_latest_checkpoint(options.checkpoint_dir)
         checkpoint = torch.load(latest_checkpoint)
         self.generator.load_state_dict(checkpoint["gen"])

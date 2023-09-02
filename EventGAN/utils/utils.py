@@ -9,6 +9,6 @@ def get_latest_checkpoint(save_dir):
             if filename.endswith('.pt'):
                 checkpoint_list.append(os.path.abspath(os.path.join(dirpath, filename)))
     checkpoint_list = sorted(checkpoint_list)
-    latest_checkpoint =  None if (len(checkpoint_list) is 0) else checkpoint_list[-1]
+    latest_checkpoint =  None if (len(checkpoint_list) == 0) else checkpoint_list[-1]
     print(latest_checkpoint)
     return latest_checkpoint

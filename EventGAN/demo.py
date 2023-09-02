@@ -1,4 +1,5 @@
-from utils.viz_utils import gen_event_images
+import os.path as op
+# from utils.viz_utils import gen_event_images
 from pytorch_utils import BaseOptions
 from models.eventgan_base import EventGANBase
 import configs
@@ -7,6 +8,7 @@ import numpy as np
 import torch
 import pickle
 from tqdm import tqdm
+from pathlib2 import Path
 from utils.event_utils import gen_discretized_event_volume
 # Read in images.
 # prev_image = cv2.imread('EventGAN/example_figs/007203_01.png')
@@ -32,8 +34,14 @@ EventGAN = EventGANBase(args)
 
 def dataset_metrics(path, metrics):
     file=open(path,'rb')
+    stem = Path(path).stem
     data=pickle.load(file)
     images=torch.from_numpy(data['images']).float().cuda()
+
+    images = images.float()/255.
+    images -= 0.5
+    images *= 2.
+
     # print(images.shape)
     # print(images.dtype)
     result=[]
@@ -59,6 +67,16 @@ def dataset_metrics(path, metrics):
                                                         260,
                                                         346]).cuda()
         
+        # Save the GT and predicted event volumes.
+        out_info = {
+            'gt_event_volume': event_volume_truth.cpu().numpy(),
+            'gen_event_volume': event_volume_est.cpu().numpy()
+        }
+        results_folder = op.join('.', 'results')
+        Path(results_folder).mkdir(exist_ok=True)
+        out_path = op.join(results_folder, stem + '_{}.pkl'.format(index))
+        with open(out_path, 'wb') as f:
+            pickle.dump(out_info, f)
         
         result.append([metric.forward(event_volume_est, event_volume_truth) for metric in metrics])
     return result
@@ -73,10 +91,12 @@ bm=BinaryMatch()
 
 info =pickle.load(open(r"/tsukimi/datasets/MVSEC/data_paths.pkl",'rb'))
 result = []
-for file in tqdm(info['val']):
+for file in tqdm(info['val'][100:]):
     path = r"/tsukimi/datasets/MVSEC/event_chunks_processed/"+file
     # print(dataset_metrics(path,[f1,bm]))
     result += dataset_metrics(path,[f1,bm])
+    print(torch.Tensor(result).mean(0))
+    # break
 print(torch.Tensor(result).mean(0))
 # event_images = gen_event_images(event_volume[-1], 'gen')
 

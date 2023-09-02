@@ -7,3 +7,6 @@
 *.hdf5
 data/*
 !data/*.txt
+logs/
+logs_backup/
+results/

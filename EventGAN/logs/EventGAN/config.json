@@ -4,7 +4,7 @@
     "resume": true,
     "num_workers": 0,
     "pin_memory": true,
-    "log_dir": "/workspace/ckd/EventGAN/EventGAN/logs/EventGAN",
+    "log_dir": "/root/EventGAN/EventGAN/logs/EventGAN",
     "checkpoint": null,
     "from_json": null,
     "num_epochs": 100,
@@ -53,6 +53,6 @@
     "flip_x": 0.5,
     "flip_y": 0.5,
     "appearance_augmentation": true,
-    "summary_dir": "/workspace/ckd/EventGAN/EventGAN/logs/EventGAN/tensorboard",
-    "checkpoint_dir": "/workspace/ckd/EventGAN/EventGAN/logs/EventGAN/checkpoints"
+    "summary_dir": "/root/EventGAN/EventGAN/logs/EventGAN/tensorboard",
+    "checkpoint_dir": "/root/EventGAN/EventGAN/logs/EventGAN/checkpoints"
 }

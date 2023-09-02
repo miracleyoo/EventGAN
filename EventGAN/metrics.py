@@ -102,6 +102,10 @@ class BinaryMatchF1(BaseMetric):
         FN = ((1 -pred) * y).sum()
 
         TN=((1-pred)*(1-y)).sum()
+        # print('TP:',TP)
+        # print('FP:',FP)
+        # print('FN:',FN)
+        # print('TN:',TN)
 
         # 计算 Precision 和 Recall
         precision = TP / (TP + FP + 1e-8)  # 加上 1e-8 避免除数为 0
