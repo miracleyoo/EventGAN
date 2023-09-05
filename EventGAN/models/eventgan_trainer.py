@@ -2,6 +2,8 @@ from models.unet import UNet
 import torch
 from torchvision.utils import make_grid
 from datasets import event_loader
+from datasets import event_loader_new 
+
 from models import decoder
 import utils.event_utils as event_utils
 import torch.nn as nn
@@ -90,16 +92,25 @@ class EventGANTrainer(pytorch_utils.BaseTrainer):
         
         self.optimizers_dict = { "optimizer_gen" : optimizer_gen,
                                  "optimizer_dis" : optimizer_dis}
-                    
-        self.train_ds, self.train_sampler = event_loader.get_and_concat_datasets(
+        
+        if self.options.legacy:
+            self.train_ds, self.train_sampler = event_loader.get_and_concat_datasets(
             self.options.train_file,
             self.options,
             train=True)
-        self.validation_ds, self.validation_sampler = event_loader.get_and_concat_datasets(
+            self.validation_ds, self.validation_sampler = event_loader.get_and_concat_datasets(
             self.options.validation_file,
             self.options,
             train=False)
-        
+        else:
+            self.train_ds, self.train_sampler = event_loader_new.get_and_concat_datasets(
+            self.options.train_file,
+            self.options,
+            train=True)
+            self.validation_ds, self.validation_sampler = event_loader_new.get_and_concat_datasets(
+            self.options.validation_file,
+            self.options,
+            train=False)
         self.cdl_kwargs["collate_fn"] = event_utils.none_safe_collate
         self.cdl_kwargs["sampler"] = self.train_sampler
 

@@ -258,7 +258,7 @@ class MVSECSequence(Dataset):
 
         return self.get_single_item(ind_in)
 
-class WeightedRandomSampler(pytorch_utils.data_loader.CheckpointSampler):
+class WeightedRandomSampler(pytorch_utils.CheckpointSampler):
     """
     Samples from a data_source with weighted probabilities for each element.
     Weights do not need to sum to 1. 

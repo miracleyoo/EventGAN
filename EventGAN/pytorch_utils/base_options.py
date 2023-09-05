@@ -20,7 +20,7 @@ class BaseOptions(object):
         req.add_argument('--name', required=True, help='Name of the experiment')
 
         gen = self.parser.add_argument_group('General')
-        gen.add_argument('--time_to_run', type=int, default=3600, help='Total time to run in seconds')
+        gen.add_argument('--time_to_run', type=int, default=-1, help='Total time to run in seconds')
         gen.add_argument('--resume', dest='resume', type=str_to_bool, default=True, help='Resume from checkpoint (Use latest checkpoint by default')
         gen.add_argument('--num_workers', type=int, default=0, help='Number of processes used for data loading')
         pin = gen.add_mutually_exclusive_group()

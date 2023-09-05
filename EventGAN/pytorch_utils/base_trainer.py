@@ -1,6 +1,8 @@
 from __future__ import division
+import os
 import sys
 import time
+import psutil
 
 import torch
 from tqdm import tqdm
@@ -92,7 +94,7 @@ class BaseTrainer(object):
         # permutation for each epoch
         train_data_loader = CheckpointDataLoader(self.train_ds,
                 **self.cdl_kwargs)
-
+        print('Training started')
         for epoch in tqdm(range(self.epoch_count, self.options.num_epochs),
                 total=self.options.num_epochs, initial=self.epoch_count):
             # setup the next epoch inside of train_data_loader
@@ -103,10 +105,11 @@ class BaseTrainer(object):
                                               total=len(self.train_ds) // self.options.batch_size,
                                               initial=train_data_loader.checkpoint_batch_idx),
                                          train_data_loader.checkpoint_batch_idx):
+                #print("memory usage", memory_usage())
                 if self.endtime < 0 or time.time() < self.endtime:
                     batch = {k: v.to(self.device) for k,v in batch.items()}
                     out = self.train_step(batch)
-
+                    #print("after train step", memory_usage())
                     if self.step_count % self.options.summary_steps == 0:
                         self.train_summaries(batch, *out)
                     
@@ -122,6 +125,7 @@ class BaseTrainer(object):
                     if self.step_count % self.options.test_steps == 0:
                         self.test()
                     self.step_count += 1
+                    #print("after", memory_usage())
                 else:
                     tqdm.write('Timeout reached')
                     self.saver.save_checkpoint(self.models_dict,
@@ -166,3 +170,9 @@ class BaseTrainer(object):
 
     def test(self):
         pass
+
+def memory_usage():
+    pid = os.getpid()
+    python_process = psutil.Process(pid)
+    memoryUse = python_process.memory_info()[0]/2.**30
+    return memoryUse

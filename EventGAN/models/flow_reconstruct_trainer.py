@@ -1,8 +1,10 @@
+import os
+import psutil
 import torch
 import torch.nn as nn
 from torchvision.utils import make_grid
 
-from datasets import event_loader
+from datasets import event_loader, event_loader_new
 from models.unet import UNet
 from losses import multi_scale_flow_loss
 
@@ -58,12 +60,22 @@ class FlowReconstructTrainer(pytorch_utils.BaseTrainer):
         self.image_loss = lambda x, y: self.l1(x, y) - self.ssim(x, y)
 
         self.optimizers_dict = {"optimizer" : optimizer }
-
-        self.train_ds, self.train_sampler = event_loader.get_and_concat_datasets(
+        
+        if self.options.legacy:
+            self.train_ds, self.train_sampler = event_loader.get_and_concat_datasets(
             self.options.train_file,
             self.options,
             train=True)
-        self.validation_ds, self.validation_sampler = event_loader.get_and_concat_datasets(
+            self.validation_ds, self.validation_sampler = event_loader.get_and_concat_datasets(
+            self.options.validation_file,
+            self.options,
+            train=False)
+        else:
+            self.train_ds, self.train_sampler = event_loader_new.get_and_concat_datasets(
+            self.options.train_file,
+            self.options,
+            train=True)
+            self.validation_ds, self.validation_sampler = event_loader_new.get_and_concat_datasets(
             self.options.validation_file,
             self.options,
             train=False)
@@ -94,7 +106,7 @@ class FlowReconstructTrainer(pytorch_utils.BaseTrainer):
 
         optimizer.zero_grad()
         loss = 0.
-
+        #print("before", self.memory_usage())
         # Generate network input.
         if self.options.model == 'flow':
             network_input = event_volume
@@ -103,7 +115,7 @@ class FlowReconstructTrainer(pytorch_utils.BaseTrainer):
             network_input = torch.cat([event_image, prev_image], 1)
 
         network_output = model(network_input)
-
+        #print("after model creation", self.memory_usage())
         # Compute losses.
         if self.options.model == 'flow':
             flow_mask = torch.sum(event_volume, 1) > 0
@@ -121,12 +133,15 @@ class FlowReconstructTrainer(pytorch_utils.BaseTrainer):
             losses['perceptual'] = loss
             outputs['recons_image'] = (network_output[-1] + 1.) / 2.
         loss.backward()
-        optimizer.step()
 
+        optimizer.step()
+        #print("after optimize", self.memory_usage())
+        
         event_vis = torch.sum(event_volume, dim=1, keepdim=True)
 
         outputs.update({ 'raw_events': torch.clamp(event_vis, 0, 1), 
                          'gt_gray': (next_image + 1.) / 2. })
+        #print("end", self.memory_usage())
         
         return losses, outputs
 
@@ -146,4 +161,6 @@ class FlowReconstructTrainer(pytorch_utils.BaseTrainer):
                                           make_grid(v, nrow=nrow), self.step_count)
 
     def train_summaries(self, input_batch, losses, output):
-        self.summaries(input, losses, output, mode="train")
+        pass
+        #self.summaries(input, losses, output, mode="train")
+

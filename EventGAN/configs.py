@@ -101,5 +101,8 @@ def get_args(parser):
     argument_group.add_argument("--appearance_augmentation",
                                 type=str_to_bool, default=True,
                                 help="Augment images with gamma and image gain.")
+    argument_group.add_argument("--legacy",
+                                type=str_to_bool, default=False,
+                                help="Use Original data loader.")
     
     return parser
