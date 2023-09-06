@@ -113,13 +113,3 @@ with open(op.join(results_folder, 'metrics_results.pkl'), 'wb') as f:
 for metric_name, metric in metrics_dict.items():
     print(metric_name, np.mean(metrics_results[metric_name]))
     
-    
-# print(torch.Tensor(result).mean(0))
-# event_images = gen_event_images(event_volume[-1], 'gen')
-
-# event_image = event_images['gen_event_time_image'][0].cpu().numpy().sum(0)
-
-# event_image *= 255. / event_image.max()
-# event_image = event_image.astype(np.uint8)
-
-# cv2.imwrite('simulated_event.png', event_image)
