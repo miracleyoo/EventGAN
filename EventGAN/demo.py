@@ -13,10 +13,18 @@ from metrics import BinaryMatchF1, BinaryMatch, PoolMSE
 options = BaseOptions()
 options.parser = configs.get_args(options.parser)
 args = options.parse_args()
-
 EventGAN = EventGANBase(args)
 
 def dataset_metrics(path, results_folder, metrics_dict, metrics_results):
+    """ Calculate the metrics for a single data file which contains a batch of events and images.
+    Args:
+        path: path to the data file
+        results_folder: folder to save the results
+        metrics_dict: dictionary of metrics
+        metrics_results: dictionary of metrics results
+    Returns:
+        None (note that the metrics_results dictionary is updated in-place)
+    """
     file=open(path,'rb')
     stem = Path(path).stem
     data=pickle.load(file)
@@ -29,7 +37,6 @@ def dataset_metrics(path, results_folder, metrics_dict, metrics_results):
     batch_event_voxels_pred = np.zeros((16, args.n_time_bins*2, 260, 346))
     batch_event_voxels_gt = np.zeros((16, args.n_time_bins*2, 260, 346))
 
-    result=[]
     for index in range (images.shape[0]-1):
         current_image=images[index:index+2]
         event_volume_est = EventGAN.forward(current_image, is_train=False)[0][0]
@@ -51,8 +58,6 @@ def dataset_metrics(path, results_folder, metrics_dict, metrics_results):
         batch_event_voxels_gt[index] = event_volume_truth.cpu().numpy()
         batch_event_voxels_pred[index] = event_volume_est.cpu().numpy()
         
-    # result.append([metric.forward(event_volume_est, event_volume_truth) for metric in metrics])
-    # print(event_volume_est.shape, event_volume_truth.shape)
     for metric_name, metric in metrics_dict.items():
         metrics_results[metric_name].append(metric.forward(
             torch.Tensor(batch_event_voxels_pred).unsqueeze(0), 
@@ -71,45 +76,44 @@ def dataset_metrics(path, results_folder, metrics_dict, metrics_results):
     with open(out_path, 'wb') as f:
         pickle.dump(out_info, f)
     
-    # return result
+if __name__ == '__main__':    
+    metrics_dict = {
+        'BinaryMatchF1_sum_c': BinaryMatchF1(op_type='sum_c'),
+        'BinaryMatchF1_sum_cp': BinaryMatchF1(op_type='sum_cp'),
+        'BinaryMatchF1_raw': BinaryMatchF1(op_type='raw'),
+        'BinaryMatch_sum_c': BinaryMatch(op_type='sum_c'),
+        'BinaryMatch_sum_cp': BinaryMatch(op_type='sum_cp'),
+        'BinaryMatch_raw': BinaryMatch(op_type='raw'),
+        'PoolMSE_2': PoolMSE(kernel_size=2),
+        'PoolMSE_4': PoolMSE(kernel_size=4),
+    }
 
-metrics_dict = {
-    'BinaryMatchF1_sum_c': BinaryMatchF1(op_type='sum_c'),
-    'BinaryMatchF1_sum_cp': BinaryMatchF1(op_type='sum_cp'),
-    'BinaryMatchF1_raw': BinaryMatchF1(op_type='raw'),
-    'BinaryMatch_sum_c': BinaryMatch(op_type='sum_c'),
-    'BinaryMatch_sum_cp': BinaryMatch(op_type='sum_cp'),
-    'BinaryMatch_raw': BinaryMatch(op_type='raw'),
-    'PoolMSE_2': PoolMSE(kernel_size=2),
-    'PoolMSE_4': PoolMSE(kernel_size=4),
-}
+    metrics_results = {
+        'BinaryMatchF1_sum_c': [],
+        'BinaryMatchF1_sum_cp': [],
+        'BinaryMatchF1_raw': [],
+        'BinaryMatch_sum_c': [],
+        'BinaryMatch_sum_cp': [],
+        'BinaryMatch_raw': [],
+        'PoolMSE_2': [],
+        'PoolMSE_4': [],
+    }
 
-metrics_results = {
-    'BinaryMatchF1_sum_c': [],
-    'BinaryMatchF1_sum_cp': [],
-    'BinaryMatchF1_raw': [],
-    'BinaryMatch_sum_c': [],
-    'BinaryMatch_sum_cp': [],
-    'BinaryMatch_raw': [],
-    'PoolMSE_2': [],
-    'PoolMSE_4': [],
-}
+    results_folder = op.join('/tsukimi/backup', 'EventGAN-pretrained-model-test-results-new')
+    Path(results_folder).mkdir(exist_ok=True)
+    info =pickle.load(open(r"/tsukimi/datasets/MVSEC/data_paths.pkl",'rb'))
 
-results_folder = op.join('/tsukimi/backup', 'EventGAN-pretrained-model-test-results-new')
-Path(results_folder).mkdir(exist_ok=True)
-info =pickle.load(open(r"/tsukimi/datasets/MVSEC/data_paths.pkl",'rb'))
+    for file in tqdm(info['test']): #[100:]):
+        path = r"/tsukimi/datasets/MVSEC/event_chunks_processed/"+file
+        dataset_metrics(path, results_folder, metrics_dict, metrics_results) #[f1,bm])
+        for metric_name, metric in metrics_dict.items():
+            print(metric_name, metrics_results[metric_name][-1])
+        # break
 
-for file in tqdm(info['test']): #[100:]):
-    path = r"/tsukimi/datasets/MVSEC/event_chunks_processed/"+file
-    dataset_metrics(path, results_folder, metrics_dict, metrics_results) #[f1,bm])
+    # save the metrics results
+    with open(op.join(results_folder, 'metrics_results.pkl'), 'wb') as f:
+        pickle.dump(metrics_results, f)
+
     for metric_name, metric in metrics_dict.items():
-        print(metric_name, metrics_results[metric_name][-1])
-    # break
-
-# save the metrics results
-with open(op.join(results_folder, 'metrics_results.pkl'), 'wb') as f:
-    pickle.dump(metrics_results, f)
-
-for metric_name, metric in metrics_dict.items():
-    print(metric_name, np.mean(metrics_results[metric_name]))
+        print(metric_name, np.mean(metrics_results[metric_name]))
     
