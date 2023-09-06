@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-attalpha1
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nvidia.com/gpu.product
+                operator: In
+                values:
+                - NVIDIA-GeForce-RTX-3090
+                - NVIDIA-RTX-A5000
+                - Quadro-RTX-6000
+                - NVIDIA-A10	
+                - NVIDIA-TITAN-RTX
+
+      containers:
+      - name: job-ckd-eventgan
+        image: pytorch/pytorch:2.0.0-cuda11.7-cudnn8-devel
+        command: ["sh", "-c", "apt update && \
+          apt install -y curl && \
+          curl -fsSL https://raw.githubusercontent.com/miracleyoo/one-key-linux-setup/master/one-key-setup-for-pytorch-docker.sh -o one-key-setup-for-pytorch-docker.sh && \
+          bash one-key-setup-for-pytorch-docker.sh && \
+          rm one-key-setup-for-pytorch-docker.sh && \
+          cd /workspace && \
+          git clone https://github.com/miracleyoo/EventGAN.git && \
+          cd EventGAN && \
+          pip install tensorboardX&& \
+          python EventGAN/train.py --name recons --model recons --batch_size 8 --num_workers 0 --train_file ./train.txt --validation_file ./val.txt&&\
+          cp EventGAN/logs /tsukimi/ 
+          "]
+        resources:
+          limits:
+            memory: 256Gi
+            cpu: 4
+            nvidia.com/gpu: 1
+            ephemeral-storage: 200Gi
+          requests:
+            memory: 128Gi
+            cpu: 4
+            nvidia.com/gpu: 1
+            ephemeral-storage: 100Gi        
+        volumeMounts:
+        - mountPath: /tsukimi
+          name: tsukimi
+        - mountPath: /dev/shm
+          name: cache-volume
+      volumes:
+        - name: tsukimi
+          persistentVolumeClaim:
+            claimName: tsukimi
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 64Gi
+          name: cache-volume
