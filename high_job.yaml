@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: job-attalpha1
+  name: job-eventgan-recon
 spec:
   backoffLimit: 1
   template:
@@ -33,7 +33,7 @@ spec:
           git clone https://github.com/miracleyoo/EventGAN.git && \
           cd EventGAN && \
           pip install tensorboardX&& \
-          python EventGAN/train.py --name recons --model recons --batch_size 8 --num_workers 0 --train_file ./train.txt --validation_file ./val.txt&&\
+          python EventGAN/train.py --name recons --model recons --batch_size 16 --num_workers 8 --train_file ./train.txt --validation_file ./val.txt&&\
           cp EventGAN/logs /tsukimi/ 
           "]
         resources:
