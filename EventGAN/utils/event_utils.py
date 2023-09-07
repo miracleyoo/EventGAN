@@ -105,6 +105,40 @@ def gen_discretized_event_volume(events, vol_size):
 
     return volume
  
+
+def gen_discretized_event_volume_from_struct(events, vol_size):
+    # volume is [timestamp, x, y, polarity]
+    volume = torch.zeros(vol_size, dtype=torch.float)
+
+    x = torch.tensor(events['x'].copy(), dtype=torch.long)
+    y = torch.tensor(events['y'].copy(), dtype=torch.long)
+    t = torch.tensor(events['timestamp'].copy())
+    p = torch.tensor(events['polarity'].copy())
+    p[p == 0] = -1  # polarity should be +1 / -1
+
+    t_min = t.min()
+    t_max = t.max()
+    t_scaled = (t-t_min) * ((vol_size[0] // 2-1) / (t_max-t_min))
+    t_scaled = torch.clamp(t_scaled, 0, vol_size[0] // 2-1)
+
+    ts_fl, ts_ce = calc_floor_ceil_delta(t_scaled.squeeze())
+    
+    inds_fl, vals_fl = create_update(x, y,
+                                     ts_fl[0], ts_fl[1],
+                                     p,
+                                     vol_size)
+        
+    volume.view(-1).put_(inds_fl, vals_fl, accumulate=True)
+
+    inds_ce, vals_ce = create_update(x, y,
+                                     ts_ce[0], ts_ce[1],
+                                     p,
+                                     vol_size)
+    volume.view(-1).put_(inds_ce, vals_ce, accumulate=True)
+
+    return volume
+
+
 def create_batch_update(x, dx, y, dy, t, dt, p, vol_size):
     assert (x>=0).byte().all() and (x<vol_size[2]).byte().all()
     assert (y>=0).byte().all() and (y<vol_size[1]).byte().all()

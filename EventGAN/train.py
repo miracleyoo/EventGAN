@@ -4,6 +4,7 @@ import configs
 options = BaseOptions()
 options.parser = configs.get_args(options.parser)
 args = options.parse_args()
+print(args)
 
 if args.model.lower() == 'eventgan':
     from models.eventgan_trainer import EventGANTrainer

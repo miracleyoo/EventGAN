@@ -54,6 +54,8 @@ class BaseTrainer(object):
                     "shuffle": self.options.shuffle_train
                 }
 
+        print(self.cdl_kwargs)
+
         # override this function to define your model, optimizers etc.
         self.init_fn()
 

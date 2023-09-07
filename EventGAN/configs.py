@@ -60,7 +60,7 @@ def get_args(parser):
                            type=str_to_bool, default=True)
     gan_group.add_argument("--flip_label", type=float,
                            help="Probability of flipping the labels when training the GAN.",
-                           default=0.1)
+                           default=0.5)
     gan_group.add_argument("--smooth_weight", type=float,
                            help="weight of smoothness loss in flow loss.",
                            default=0.5)
@@ -88,7 +88,7 @@ def get_args(parser):
                                 default=6)
     argument_group.add_argument("--n_time_bins", type=int,
                                 help="Number of bins along the time dimension.",
-                                default=9)
+                                default=10)
     argument_group.add_argument("--n_image_channels", type=int,
                                 help="Number of channels in the image.",
                                 default=1)

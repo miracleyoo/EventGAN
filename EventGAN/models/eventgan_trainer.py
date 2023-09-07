@@ -2,7 +2,7 @@ from models.unet import UNet
 import torch
 from torchvision.utils import make_grid
 from datasets import event_loader
-from datasets import event_loader_new 
+from datasets import event_loader_optimized
 
 from models import decoder
 import utils.event_utils as event_utils
@@ -103,11 +103,11 @@ class EventGANTrainer(pytorch_utils.BaseTrainer):
             self.options,
             train=False)
         else:
-            self.train_ds, self.train_sampler = event_loader_new.get_and_concat_datasets(
+            self.train_ds, self.train_sampler = event_loader_optimized.get_and_concat_datasets(
             self.options.train_file,
             self.options,
             train=True)
-            self.validation_ds, self.validation_sampler = event_loader_new.get_and_concat_datasets(
+            self.validation_ds, self.validation_sampler = event_loader_optimized.get_and_concat_datasets(
             self.options.validation_file,
             self.options,
             train=False)
