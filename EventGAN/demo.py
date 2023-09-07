@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
     results_folder = op.join('/tsukimi/backup', 'EventGAN-pretrained-model-test-results-new')
     Path(results_folder).mkdir(exist_ok=True)
-    info =pickle.load(open(r"/tsukimi/datasets/MVSEC/data_paths.pkl",'rb'))
+    info =pickle.load(open(r"/tsukimi/datasets/MVSEC/data_paths_new.pkl",'rb'))
 
     for file in tqdm(info['test']): #[100:]):
         path = r"/tsukimi/datasets/MVSEC/event_chunks_processed/"+file
