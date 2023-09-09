@@ -231,8 +231,7 @@ class EventGANTrainer(pytorch_utils.BaseTrainer):
                 gen_prev_images_gt,
                 gen_next_images_gt,
                 flow_output,
-                flow_mask,
-                second_order_smooth=False)
+                flow_mask)
             flow_loss = photo_loss
             if not self.options.no_flow_smoothness:
                 flow_loss += smooth_loss * self.options.smooth_weight
