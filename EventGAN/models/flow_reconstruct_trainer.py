@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torchvision.utils import make_grid
 
-from datasets import event_loader, event_loader_new
+from datasets import event_loader, event_loader_optimized
 from models.unet import UNet
 from losses import multi_scale_flow_loss
 
@@ -17,9 +17,13 @@ import radam
 import pytorch_utils
 from pytorch_utils import CheckpointDataLoader, CheckpointSaver
 
+# class FlowReconstructTrainer(pytorch_utils.BaseTrainer):
 class FlowReconstructTrainer(pytorch_utils.BaseTrainer):
+
     def __init__(self, options):
         super(FlowReconstructTrainer, self).__init__(options)
+        # print(options)
+
 
     def init_fn(self):
         if self.options.model == 'flow':
@@ -71,11 +75,11 @@ class FlowReconstructTrainer(pytorch_utils.BaseTrainer):
             self.options,
             train=False)
         else:
-            self.train_ds, self.train_sampler = event_loader_new.get_and_concat_datasets(
+            self.train_ds, self.train_sampler = event_loader_optimized.get_and_concat_datasets(
             self.options.train_file,
             self.options,
             train=True)
-            self.validation_ds, self.validation_sampler = event_loader_new.get_and_concat_datasets(
+            self.validation_ds, self.validation_sampler = event_loader_optimized.get_and_concat_datasets(
             self.options.validation_file,
             self.options,
             train=False)

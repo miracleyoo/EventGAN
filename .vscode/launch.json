@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: train.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/EventGAN/train.py",
+            "args": [
+                // --name recons --model recons --batch_size 1 --num_workers 0 --train_file ./val.txt --validation_file ./val.txt                
+                "--name", "recons", "--model", "recons", "--batch_size", "1", "--num_workers", "0", "--train_file", "/home/ayaka/ckd/EventGan/val.txt", "--validation_file", "/home/ayaka/ckd/EventGan/val.txt"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                //"PYTHONPATH": "/home/ayaka/anaconda/bin/python" // Optional: Set PYTHONPATH if needed
+            },
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

@@ -19,6 +19,7 @@ def single_flow2rgb(flow_x, flow_y, hsv_buffer=None):
 
 def flow2rgb(flow, squeeze=True):
     flow_x, flow_y = flow[:,0,:,:].cpu().detach().numpy(), flow[:,1,:,:].cpu().detach().numpy()
+    # print(flow_x.shape, flow_y.shape)
 
     if squeeze:
         flow_x = flow_x.squeeze()

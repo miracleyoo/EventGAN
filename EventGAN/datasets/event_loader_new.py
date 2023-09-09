@@ -275,8 +275,11 @@ class MVSECSequence(Dataset):
     def __getitem__(self, ind_in):
         if not self.loaded:
             self.load()
-
-        return self.get_single_item(ind_in)
+        rtn = self.get_single_item(ind_in)
+        # if ind_in == self.__len__() - 1:
+        #     print("Closing dataset")
+        self.close()
+        return rtn
 
 class WeightedRandomSampler(pytorch_utils.data_loader.CheckpointSampler):
     """
@@ -318,6 +321,8 @@ def get_and_concat_datasets(path_file, options, train=True):
         ds_len_list += [weight] * len(ds_list[-1])
     weights = 1. / torch.Tensor(ds_len_list)
     ds = torch.utils.data.ConcatDataset(ds_list)
+    # # from torch.utils.data.sampler import SequentialSampler
+    # sampler=pytorch_utils.data_loader.SequentialSampler(ds)
     sampler = WeightedRandomSampler(ds,
                                     weights)
     

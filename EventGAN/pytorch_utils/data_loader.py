@@ -40,7 +40,7 @@ class RandomSampler(CheckpointSampler):
 class SequentialSampler(CheckpointSampler):
 
     def __init__(self, data_source):
-        super(SequentialSampler, self).__init__()
+        super(SequentialSampler, self).__init__(data_source)
 
     def next_dataset_perm(self):
         return list(range(len(self.data_source)))
