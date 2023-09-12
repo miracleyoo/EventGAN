@@ -58,6 +58,7 @@ def calc_floor_ceil_delta(x):
     return [x_fl.long(), dx_fl], [x_ce.long(), dx_ce]
 
 def create_update(x, y, t, dt, p, vol_size):
+    # print("vol_size: ", vol_size)
     assert (x>=0).byte().all() and (x<vol_size[2]).byte().all()
     assert (y>=0).byte().all() and (y<vol_size[1]).byte().all()
     assert (t>=0).byte().all() and (t<vol_size[0] // 2).byte().all()
@@ -87,6 +88,7 @@ def gen_discretized_event_volume(events, vol_size):
     t_min = t.min()
     t_max = t.max()
     t_scaled = (t-t_min) * ((vol_size[0] // 2-1) / (t_max-t_min))
+    t_scaled = torch.clamp(t_scaled, 0, vol_size[0] // 2-1)
 
     ts_fl, ts_ce = calc_floor_ceil_delta(t_scaled.squeeze())
     

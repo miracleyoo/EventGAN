@@ -14,6 +14,7 @@ options = BaseOptions()
 options.parser = configs.get_args(options.parser)
 args = options.parse_args()
 EventGAN = EventGANBase(args)
+print("n_time_bins: ", args.n_time_bins)
 
 def dataset_metrics(path, results_folder, metrics_dict, metrics_results):
     """ Calculate the metrics for a single data file which contains a batch of events and images.
@@ -99,7 +100,7 @@ if __name__ == '__main__':
         'PoolMSE_4': [],
     }
 
-    results_folder = op.join('/tsukimi/backup', 'EventGAN-pretrained-model-test-results-new')
+    results_folder = op.join('/tsukimi/backup', 'EventGAN-pretrained-model-test-results-retrained')
     Path(results_folder).mkdir(exist_ok=True)
     info =pickle.load(open(r"/tsukimi/datasets/MVSEC/data_paths_new.pkl",'rb'))
 
